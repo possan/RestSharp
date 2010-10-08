@@ -26,234 +26,234 @@ using RestSharp.Extensions;
 
 namespace RestSharp
 {
-	/// <summary>
-	/// HttpWebRequest wrapper (sync methods)
-	/// </summary>
-	public partial class Http
-	{
-		/// <summary>
-		/// Proxy info to be sent with request
-		/// </summary>
-		public IWebProxy Proxy { get; set; }
+    /// <summary>
+    /// HttpWebRequest wrapper (sync methods)
+    /// </summary>
+    public partial class Http
+    {
+        /// <summary>
+        /// Proxy info to be sent with request
+        /// </summary>
+        public IWebProxy Proxy { get; set; }
 
-		/// <summary>
-		/// Execute a POST request
-		/// </summary>
-		public HttpResponse Post()
-		{
-			return PostPutInternal("POST");
-		}
+        /// <summary>
+        /// Execute a POST request
+        /// </summary>
+        public HttpResponse Post()
+        {
+            return PostPutInternal("POST");
+        }
 
-		/// <summary>
-		/// Execute a PUT request
-		/// </summary>
-		public HttpResponse Put()
-		{
-			return PostPutInternal("PUT");
-		}
+        /// <summary>
+        /// Execute a PUT request
+        /// </summary>
+        public HttpResponse Put()
+        {
+            return PostPutInternal("PUT");
+        }
 
-		/// <summary>
-		/// Execute a GET request
-		/// </summary>
-		public HttpResponse Get()
-		{
-			return GetStyleMethodInternal("GET");
-		}
+        /// <summary>
+        /// Execute a GET request
+        /// </summary>
+        public HttpResponse Get()
+        {
+            return GetStyleMethodInternal("GET");
+        }
 
-		/// <summary>
-		/// Execute a HEAD request
-		/// </summary>
-		public HttpResponse Head()
-		{
-			return GetStyleMethodInternal("HEAD");
-		}
+        /// <summary>
+        /// Execute a HEAD request
+        /// </summary>
+        public HttpResponse Head()
+        {
+            return GetStyleMethodInternal("HEAD");
+        }
 
-		/// <summary>
-		/// Execute an OPTIONS request
-		/// </summary>
-		public HttpResponse Options()
-		{
-			return GetStyleMethodInternal("OPTIONS");
-		}
+        /// <summary>
+        /// Execute an OPTIONS request
+        /// </summary>
+        public HttpResponse Options()
+        {
+            return GetStyleMethodInternal("OPTIONS");
+        }
 
-		/// <summary>
-		/// Execute a DELETE request
-		/// </summary>
-		public HttpResponse Delete()
-		{
-			return GetStyleMethodInternal("DELETE");
-		}
+        /// <summary>
+        /// Execute a DELETE request
+        /// </summary>
+        public HttpResponse Delete()
+        {
+            return GetStyleMethodInternal("DELETE");
+        }
 
-		private HttpResponse GetStyleMethodInternal(string method)
-		{
-			var url = AssembleUrl();
-			var webRequest = ConfigureWebRequest(method, url);
+        private HttpResponse GetStyleMethodInternal(string method)
+        {
+            var url = AssembleUrl();
+            var webRequest = ConfigureWebRequest(method, url);
 
-			return GetResponse(webRequest);
-		}
+            return GetResponse(webRequest);
+        }
 
-		private HttpResponse PostPutInternal(string method)
-		{
-			var webRequest = ConfigureWebRequest(method, Url);
+        private HttpResponse PostPutInternal(string method)
+        {
+            var webRequest = ConfigureWebRequest(method, Url);
 
-			PreparePostData(webRequest);
+            PreparePostData(webRequest);
 
-			WriteRequestBody(webRequest);
-			return GetResponse(webRequest);
-		}
+            WriteRequestBody(webRequest);
+            return GetResponse(webRequest);
+        }
 
-		partial void AddSyncHeaderActions()
-		{
-			_restrictedHeaderActions.Add("Connection", (r, v) => r.Connection = v);
-			_restrictedHeaderActions.Add("Content-Length", (r, v) => r.ContentLength = Convert.ToInt64(v));
-			_restrictedHeaderActions.Add("Expect", (r, v) => r.Expect = v);
-			_restrictedHeaderActions.Add("If-Modified-Since", (r, v) => r.IfModifiedSince = Convert.ToDateTime(v));
-			_restrictedHeaderActions.Add("Referer", (r, v) => r.Referer = v);
-			_restrictedHeaderActions.Add("Transfer-Encoding", (r, v) => { r.TransferEncoding = v; r.SendChunked = true; });
-			_restrictedHeaderActions.Add("User-Agent", (r, v) => r.UserAgent = v);
-		}
+        partial void AddSyncHeaderActions()
+        {
+            _restrictedHeaderActions.Add("Connection", (r, v) => r.Connection = v);
+            _restrictedHeaderActions.Add("Content-Length", (r, v) => r.ContentLength = Convert.ToInt64(v));
+            _restrictedHeaderActions.Add("Expect", (r, v) => r.Expect = v);
+            _restrictedHeaderActions.Add("If-Modified-Since", (r, v) => r.IfModifiedSince = Convert.ToDateTime(v));
+            _restrictedHeaderActions.Add("Referer", (r, v) => r.Referer = v);
+            _restrictedHeaderActions.Add("Transfer-Encoding", (r, v) => { r.TransferEncoding = v; r.SendChunked = true; });
+            _restrictedHeaderActions.Add("User-Agent", (r, v) => r.UserAgent = v);
+        }
 
-		private HttpResponse GetResponse(HttpWebRequest request)
-		{
-			var response = new HttpResponse();
-			response.ResponseStatus = ResponseStatus.None;
+        private HttpResponse GetResponse(HttpWebRequest request)
+        {
+            var response = new HttpResponse();
+            response.ResponseStatus = ResponseStatus.None;
 
-			try
-			{
-				var webResponse = GetRawResponse(request);
-				ExtractResponseData(response, webResponse);
-			}
-			catch (Exception ex)
-			{
-				response.ErrorMessage = ex.Message;
-				response.ErrorException = ex;
-				response.ResponseStatus = ResponseStatus.Error;
-			}
+            try
+            {
+                var webResponse = GetRawResponse(request);
+                ExtractResponseData(response, webResponse);
+            }
+            catch (Exception ex)
+            {
+                response.ErrorMessage = ex.Message;
+                response.ErrorException = ex;
+                response.ResponseStatus = ResponseStatus.Error;
+            }
 
-			return response;
-		}
+            return response;
+        }
 
-		private HttpWebResponse GetRawResponse(HttpWebRequest request)
-		{
-			HttpWebResponse raw = null;
-			try
-			{
-				raw = (HttpWebResponse)request.GetResponse();
-			}
-			catch (WebException ex)
-			{
-				if (ex.Response is HttpWebResponse)
-				{
-					raw = ex.Response as HttpWebResponse;
-				}
-			}
+        private HttpWebResponse GetRawResponse(HttpWebRequest request)
+        {
+            HttpWebResponse raw = null;
+            try
+            {
+                raw = (HttpWebResponse)request.GetResponse();
+            }
+            catch (WebException ex)
+            {
+                if (ex.Response is HttpWebResponse)
+                {
+                    raw = ex.Response as HttpWebResponse;
+                }
+            }
 
-			return raw;
-		}
+            return raw;
+        }
 
-		private void PreparePostData(HttpWebRequest webRequest)
-		{
-			if (HasFiles)
-			{
-				webRequest.ContentType = GetMultipartFormContentType();
-				WriteMultipartFormData(webRequest);
-			}
-			else
-			{
-				PreparePostBody(webRequest);
-			}
-		}
+        private void PreparePostData(HttpWebRequest webRequest)
+        {
+            if (HasFiles)
+            {
+                webRequest.ContentType = GetMultipartFormContentType();
+                WriteMultipartFormData(webRequest);
+            }
+            else
+            {
+                PreparePostBody(webRequest);
+            }
+        }
 
-		private void WriteMultipartFormData(HttpWebRequest webRequest)
-		{
-			var encoding = Encoding.UTF8;
-			using (Stream formDataStream = webRequest.GetRequestStream())
-			{
-				foreach (var file in Files)
-				{
-					var fileName = file.FileName;
-					var data = file.Data;
-					var length = data.Length;
-					var contentType = file.ContentType;
-					// Add just the first part of this param, since we will write the file data directly to the Stream
-					string header = string.Format("--{0}{3}Content-Disposition: form-data; name=\"{1}\"; filename=\"{1}\"{3}Content-Type: {2}{3}{3}",
-													FormBoundary,
-													fileName,
-													contentType ?? "application/octet-stream",
-													Environment.NewLine);
+        private void WriteMultipartFormData(HttpWebRequest webRequest)
+        {
+            var encoding = Encoding.UTF8;
+            using (Stream formDataStream = webRequest.GetRequestStream())
+            {
+                foreach (var file in Files)
+                {
+                    var fileName = file.FileName;
+                    var fileParameter = file.ParameterName ?? fileName;
+                    var data = file.Data;
+                    var length = data.Length;
+                    var contentType = file.ContentType;
+                    // Add just the first part of this param, since we will write the file data directly to the Stream
+                    string header = string.Format("--{0}{4}Content-Disposition: form-data; name=\"{2}\"; filename=\"{1}\"{4}Content-Type: {3}{4}{4}",
+                                                    FormBoundary,
+                                                    fileName,
+                                                    fileParameter,
+                                                    contentType ?? "application/octet-stream",
+                                                    Environment.NewLine);
 
-					formDataStream.Write(encoding.GetBytes(header), 0, header.Length);
-					// Write the file data directly to the Stream, rather than serializing it to a string.
-					formDataStream.Write(data, 0, length);
-					string lineEnding = Environment.NewLine;
-					formDataStream.Write(encoding.GetBytes(lineEnding), 0, lineEnding.Length);
-				}
+                    formDataStream.Write(encoding.GetBytes(header), 0, header.Length);
+                    // Write the file data directly to the Stream, rather than serializing it to a string.
+                    formDataStream.Write(data, 0, length);
+                }
 
-				foreach (var param in Parameters)
-				{
-					var postData = string.Format("--{0}{3}Content-Disposition: form-data; name=\"{1}\"{3}{3}{2}{3}",
-													FormBoundary,
-													param.Name,
-													param.Value,
-													Environment.NewLine);
+                foreach (var param in Parameters)
+                {
+                    var postData = string.Format("--{0}{3}Content-Disposition: form-data; name=\"{1}\"{3}{3}{2}{3}",
+                                                    FormBoundary,
+                                                    param.Name,
+                                                    param.Value,
+                                                    Environment.NewLine);
 
-					formDataStream.Write(encoding.GetBytes(postData), 0, postData.Length);
-				}
+                    formDataStream.Write(encoding.GetBytes(postData), 0, postData.Length);
+                }
 
-				string footer = String.Format("{1}--{0}--{1}", FormBoundary, Environment.NewLine);
-				formDataStream.Write(encoding.GetBytes(footer), 0, footer.Length);
-			}
-		}
+                string footer = String.Format("{1}--{0}--{1}", FormBoundary, Environment.NewLine);
+                formDataStream.Write(encoding.GetBytes(footer), 0, footer.Length);
+            }
+        }
 
-		private void WriteRequestBody(HttpWebRequest webRequest)
-		{
-			if (HasBody)
-			{
-				var encoding = Encoding.UTF8;
-				webRequest.ContentLength = RequestBody.Length;
+        private void WriteRequestBody(HttpWebRequest webRequest)
+        {
+            if (HasBody)
+            {
+                var encoding = Encoding.UTF8;
+                webRequest.ContentLength = RequestBody.Length;
 
-				using (var requestStream = webRequest.GetRequestStream())
-				{
-					requestStream.Write(encoding.GetBytes(RequestBody), 0, RequestBody.Length);
-				}
-			}
-		}
+                using (var requestStream = webRequest.GetRequestStream())
+                {
+                    requestStream.Write(encoding.GetBytes(RequestBody), 0, RequestBody.Length);
+                }
+            }
+        }
 
-		private HttpWebRequest ConfigureWebRequest(string method, Uri url)
-		{
-			var webRequest = (HttpWebRequest)WebRequest.Create(url);
+        private HttpWebRequest ConfigureWebRequest(string method, Uri url)
+        {
+            var webRequest = (HttpWebRequest)WebRequest.Create(url);
 
-			AppendHeaders(webRequest);
-			AppendCookies(webRequest);
+            AppendHeaders(webRequest);
+            AppendCookies(webRequest);
 
-			webRequest.Method = method;
+            webRequest.Method = method;
 
-			// make sure Content-Length header is always sent since default is -1
-			webRequest.ContentLength = 0;
+            // make sure Content-Length header is always sent since default is -1
+            webRequest.ContentLength = 0;
 
-			webRequest.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip | DecompressionMethods.None;
+            webRequest.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip | DecompressionMethods.None;
 
-			if (UserAgent.HasValue())
-			{
-				webRequest.UserAgent = UserAgent;
-			}
+            if (UserAgent.HasValue())
+            {
+                webRequest.UserAgent = UserAgent;
+            }
 
-			if (Timeout != 0)
-			{
-				webRequest.Timeout = Timeout;
-			}
+            if (Timeout != 0)
+            {
+                webRequest.Timeout = Timeout;
+            }
 
-			if (Credentials != null)
-			{
-				webRequest.Credentials = Credentials;
-			}
+            if (Credentials != null)
+            {
+                webRequest.Credentials = Credentials;
+            }
 
-			if (Proxy != null)
-			{
-				webRequest.Proxy = Proxy;
-			}
-			return webRequest;
-		}
-	}
+            if (Proxy != null)
+            {
+                webRequest.Proxy = Proxy;
+            }
+            return webRequest;
+        }
+    }
 }
 #endif
