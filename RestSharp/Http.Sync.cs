@@ -94,7 +94,8 @@ namespace RestSharp
 
         private HttpResponse PostPutInternal(string method)
         {
-            var webRequest = ConfigureWebRequest(method, Url);
+            var url = AssembleUrl();
+            var webRequest = ConfigureWebRequest(method, url);
 
             PreparePostData(webRequest);
 
@@ -167,6 +168,7 @@ namespace RestSharp
         private void WriteMultipartFormData(HttpWebRequest webRequest)
         {
             var encoding = Encoding.UTF8;
+            webRequest.AllowWriteStreamBuffering = true;
             using (Stream formDataStream = webRequest.GetRequestStream())
             {
                 foreach (var file in Files)
@@ -177,7 +179,7 @@ namespace RestSharp
                     var length = data.Length;
                     var contentType = file.ContentType;
                     // Add just the first part of this param, since we will write the file data directly to the Stream
-                    string header = string.Format("--{0}{4}Content-Disposition: form-data; name=\"{2}\"; filename=\"{1}\"{4}Content-Type: {3}{4}{4}",
+                    string header = string.Format("--{0}{4}Content-Disposition: form-data; name=\"{2}\"; filename=\"{1}\";{4}Content-Type: {3}{4}{4}",
                                                     FormBoundary,
                                                     fileName,
                                                     fileParameter,
@@ -187,17 +189,6 @@ namespace RestSharp
                     formDataStream.Write(encoding.GetBytes(header), 0, header.Length);
                     // Write the file data directly to the Stream, rather than serializing it to a string.
                     formDataStream.Write(data, 0, length);
-                }
-
-                foreach (var param in Parameters)
-                {
-                    var postData = string.Format("--{0}{3}Content-Disposition: form-data; name=\"{1}\"{3}{3}{2}{3}",
-                                                    FormBoundary,
-                                                    param.Name,
-                                                    param.Value,
-                                                    Environment.NewLine);
-
-                    formDataStream.Write(encoding.GetBytes(postData), 0, postData.Length);
                 }
 
                 string footer = String.Format("{1}--{0}--{1}", FormBoundary, Environment.NewLine);
@@ -229,7 +220,7 @@ namespace RestSharp
             webRequest.Method = method;
 
             // make sure Content-Length header is always sent since default is -1
-            webRequest.ContentLength = 0;
+            //webRequest.ContentLength = 0;
 
             webRequest.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip | DecompressionMethods.None;
 

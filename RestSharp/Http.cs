@@ -141,7 +141,7 @@ namespace RestSharp
 			_restrictedHeaderActions.Add("Range", (r, v) => { /* Ignore */ });
 		}
 
-		private const string FormBoundary = "-----------------------------28947758029299";
+        private const string FormBoundary = "----------------------------128947758029299";
 		private string GetMultipartFormContentType()
 		{
 			return string.Format("multipart/form-data; boundary={0}", FormBoundary);
@@ -195,10 +195,6 @@ namespace RestSharp
 			string url = Url.ToString();
 			if (HasParameters)
 			{
-				if (url.EndsWith("/"))
-				{
-					url = url.Substring(0, url.Length - 1);
-				}
 				var data = EncodeParameters();
 				url = string.Format("{0}?{1}", url, data);
 			}
@@ -212,7 +208,7 @@ namespace RestSharp
 			{
 				if (querystring.Length > 1)
 					querystring.Append("&");
-				querystring.AppendFormat("{0}={1}", p.Name.UrlEncode(), p.Value.UrlEncode());
+				querystring.AppendFormat("{0}={1}", Uri.EscapeDataString(p.Name), Uri.EscapeDataString(p.Value));
 			}
 
 			return querystring.ToString();
